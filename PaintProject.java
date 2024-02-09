@@ -1,49 +1,20 @@
 package PaintProject;
 
+import java.awt.*;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import javax.imageio.ImageIO;
-import javax.swing.JFileChooser;
-
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Graphics;
-import javax.swing.*;
-import javax.swing.JPanel;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 import java.io.IOException;
 import java.net.URL;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
+import javax.imageio.ImageIO;
+import javax.swing.*;
 
 public class PaintProject extends JFrame {
-
-//    PaintProject() {
-//        setTitle("Paint");
-//        setSize(1500, 1000);
-//        setBackground(Color.CYAN);
-//        setVisible(true);
-//    }
-    public static void main(String[] args) {
-        //PaintProject frame = new PaintProject();
+    PaintProject() {
         JFrame frame = new JFrame();
         DrawPanel drawPanel = new DrawPanel();
         ButtonPanel buttonPanel = new ButtonPanel(drawPanel);
         frame.setSize(1500, 1000);
-
-        //frame.setContentPane(drawPanel);
-        //frame.setContentPane(buttonPanel);
-        //panel.setLayout(new FlowLayout());
         frame.add(buttonPanel, BorderLayout.PAGE_START);
         frame.add(drawPanel, BorderLayout.CENTER);
         drawPanel.setBackground(Color.WHITE);
@@ -51,6 +22,9 @@ public class PaintProject extends JFrame {
         frame.setTitle("Paint");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
+    }
+    public static void main(String[] args) {
+        PaintProject frame = new PaintProject();
 
     }
 }
@@ -60,7 +34,7 @@ class ButtonPanel extends JPanel {
     JCheckBox checkFilled;
     JButton btnRed, btnGreen, btnBlue, btnRectangle,
             btnOval, btnLine, btnPencil, btnEraser,
-            btnClear, btnUndo, btnSave, btnOpen;
+            btnClear, btnSave, btnOpen;
 
     public ButtonPanel(final DrawPanel drawPanel) {
 
@@ -150,7 +124,6 @@ class ButtonPanel extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 drawPanel.setCurrentShape("Eraser");
                 drawPanel.setCurrentColor(Color.WHITE);
-
             }
         });
 
@@ -161,33 +134,19 @@ class ButtonPanel extends JPanel {
             }
         });
 
-        btnUndo = createIconButton(Color.WHITE, "Undo.png", new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-
-            }
-        });
-
         btnSave = createIconButton(Color.WHITE, "Save.png", new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JFileChooser fileChooser = new JFileChooser();
-                // Set default directory (optional)
-                //fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
 
-                // Show save dialog
                 int result = fileChooser.showSaveDialog(ButtonPanel.this);
                 if (result == JFileChooser.APPROVE_OPTION) {
-                    // Get the selected file
                     File selectedFile = fileChooser.getSelectedFile();
                     try {
-                        // Create an image of the drawing panel
                         BufferedImage image = new BufferedImage(drawPanel.getWidth(), drawPanel.getHeight(), BufferedImage.TYPE_INT_RGB);
                         Graphics2D g2d = image.createGraphics();
                         drawPanel.paint(g2d);
-                        // Write the image to the selected file
                         ImageIO.write(image, "PNG", selectedFile);
-                        // Dispose of graphics context
                         g2d.dispose();
                     } catch (IOException ex) {
                         ex.printStackTrace();
@@ -195,6 +154,7 @@ class ButtonPanel extends JPanel {
                 }
             }
         });
+
 
         btnOpen = createIconButton(Color.WHITE, "Open.png", new ActionListener() {
             @Override
@@ -206,11 +166,8 @@ class ButtonPanel extends JPanel {
                     // Get the selected file
                     File selectedFile = fileChooser.getSelectedFile();
                     try {
-                        // Read the image from the selected file
                         BufferedImage image = ImageIO.read(selectedFile);
-                        // Set the size of the drawing panel to match the size of the loaded image
                         drawPanel.setPreferredSize(new Dimension(image.getWidth(), image.getHeight()));
-                        // Repaint the drawing panel with the loaded image
                         Graphics g = drawPanel.getGraphics();
                         g.drawImage(image, 0, 0, null);
                     } catch (IOException ex) {
@@ -232,7 +189,6 @@ class ButtonPanel extends JPanel {
         add(btnPencil);
         add(btnEraser);
         add(btnClear);
-        add(btnUndo);
         add(btnSave);
         add(btnOpen);
     }
@@ -244,14 +200,11 @@ class ButtonPanel extends JPanel {
     }
 
     private JButton createIconButton(Color color, String fileLocation, ActionListener listener) {
-        // Get the URL of the image file
         URL imageURL = getClass().getResource(fileLocation);
         ImageIcon icon = new ImageIcon(imageURL);
         JButton button = new JButton(icon);
-        // set the background Color
         button.setBackground(color);
         button.addActionListener(listener);
-        // Set a specific size for the button
         button.setPreferredSize(new Dimension(50, 40));
         Image scaledImage = icon.getImage().getScaledInstance(50, 40, Image.SCALE_SMOOTH);
         button.setIcon(new ImageIcon(scaledImage));
@@ -261,10 +214,8 @@ class ButtonPanel extends JPanel {
     private JButton createIconButton(Color color, ActionListener listener) {
 
         JButton button = new JButton();
-        // set the background Color
         button.setBackground(color);
         button.addActionListener(listener);
-        // Set a specific size for the button
         button.setPreferredSize(new Dimension(50, 40));
         return button;
     }
@@ -273,10 +224,10 @@ class ButtonPanel extends JPanel {
 
 class DrawPanel extends JPanel {
 
-    private Color currentColor;
+    private Color currentColor = Color.BLACK;
     private boolean isFilled;
     private int startX, startY, endX, endY;
-    private String currentShape;
+    private String currentShape = "Pencil";
 
     DrawPanel() {
         MyMouseListner ML = new MyMouseListner();
@@ -286,15 +237,11 @@ class DrawPanel extends JPanel {
     }
 
     public class MyMouseListner implements MouseListener, MouseMotionListener {
+
         @Override
         public void mousePressed(MouseEvent e) {
             startX = e.getX();
             startY = e.getY();
-            if (currentShape.equals("Pencil") || currentShape.equals("Eraser")) {
-                Graphics g = getGraphics();
-                g.setColor(currentColor);
-                g.fillRect(startX, startY, 2, 2); // Draw a tiny square at the starting point
-            }
         }
 
         @Override
@@ -328,34 +275,22 @@ class DrawPanel extends JPanel {
 
         @Override
         public void mouseDragged(MouseEvent e) {
-            endX = e.getX();
-            endY = e.getY();
-            Graphics g = getGraphics();
-            g.setColor(currentColor);
+            Graphics2D g2d = (Graphics2D) getGraphics();
+            g2d.setColor(currentColor);
+
             switch (currentShape) {
                 case "Pencil": {
-                    g.drawLine(startX, startY, endX, endY);
-                    startX = endX;
-                    startY = endY;
+                    g2d.setColor(currentColor);
+                    g2d.drawLine(startX, startY, e.getX(), e.getY());
+                    startX = e.getX();
+                    startY = e.getY();
                     break;
                 }
                 case "Eraser": {
-                    g.setColor(getBackground());
-                    g.fillRect(endX - 5, endY - 5, 10, 10); // Erase a small area around the cursor
-                    startX = endX;
-                    startY = endY;
-                    break;
-                }
-                case "Rectangle": {
-                    repaint();
-                    break;
-                }
-                case "Oval": {
-                    repaint();
-                    break;
-                }
-                case "Line": {
-                    repaint();
+                    g2d.setColor(getBackground());
+                    g2d.fillRect(startX, startY, 40, 40);
+                    startX = e.getX();
+                    startY = e.getY();
                     break;
                 }
                 default:
@@ -365,29 +300,29 @@ class DrawPanel extends JPanel {
 
         @Override
         public void mouseClicked(MouseEvent e) {
+
         }
 
         @Override
         public void mouseEntered(MouseEvent e) {
+
         }
 
         @Override
         public void mouseExited(MouseEvent e) {
+
         }
 
         @Override
         public void mouseMoved(MouseEvent e) {
-        }
 
+        }
     }
 
     @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        if (currentShape.equals("Rectangle") || currentShape.equals("Oval") || currentShape.equals("Line")) {
-            Graphics2D g2d = (Graphics2D) g;
-            g2d.setColor(currentColor);
-            switch (currentShape) {
+    public void paint(Graphics g2d) {
+        super.paint(g2d);
+        switch (currentShape) {
                 case "Rectangle":
                     if (isFilled) {
                         g2d.fillRect(Math.min(startX, endX), Math.min(startY, endY), Math.abs(endX - startX), Math.abs(endY - startY));
@@ -408,7 +343,6 @@ class DrawPanel extends JPanel {
                 default:
                     break;
             }
-        }
     }
 
     public void setCurrentColor(Color color) {
